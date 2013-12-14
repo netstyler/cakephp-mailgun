@@ -1,4 +1,4 @@
-mailgun-newsletter
+NewsletterGun
 ==================
 
-Newsletter Cakephp Plugin for Rackspace Mailgun
+Newsletter Management Cakephp Plugin for Rackspace Mailgun API
