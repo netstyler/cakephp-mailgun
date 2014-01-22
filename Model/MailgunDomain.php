@@ -3,10 +3,6 @@ App::uses('MailgunAppModel', 'Mailgun.Model');
 
 class MailgunDomain extends MailgunAppModel {
 
-	public $useDbConfig = 'mailgun';
-
-	public $useTable = false;
-
 	protected $_schema = array(
 		'name' => array(
 			'type' => 'string',

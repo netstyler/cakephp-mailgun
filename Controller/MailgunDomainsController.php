@@ -6,7 +6,7 @@ class MailgunDomainsController extends MailgunAppController {
  *
  * @return void
  */
-	public function index() {
+	public function admin_index() {
 		$domains = $this->MailgunDomain->find('all');
 		$this->set('domains', $domains);
 	}
@@ -16,7 +16,7 @@ class MailgunDomainsController extends MailgunAppController {
  *
  * @return void
  */
-	public function add() {
+	public function admin_add() {
 		if (!$this->request->is('get')) {
 			$this->MailgunDomain->create();
 			$result = $this->MailgunDomain->save($this->request->data, array('callbacks' => false));
@@ -31,7 +31,7 @@ class MailgunDomainsController extends MailgunAppController {
 		$this->set('spamActions', $this->MailgunDomain->getSpamActions());
 	}
 
-	public function remove() {
+	public function admin_remove() {
 		$this->MailgunDomain->delete();
 	}
 
