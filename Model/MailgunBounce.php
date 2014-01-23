@@ -1,23 +1,29 @@
 <?php
 App::uses('MailgunAppModel', 'Mailgun.Model');
 
-class MailgunCampaign extends MailgunAppModel {
+class MailgunBounce extends MailgunAppModel {
 
 	protected $_schema = array(
-		'name' => array(
+		'address' => array(
 			'type' => 'string',
 			'null' => false,
 			'length' => 255,
 		),
-		'id' => array(
+		'code' => array(
 			'type' => 'integer',
+			'null' => false,
+			'length' => 4,
+			'default' => 550
+		),
+		'error' => array(
+			'type' => 'text',
 			'null' => true,
-			'length' => 11,
 		),
 	);
 
 	public $validate = array(
-		'name' => array(
+		'address' => 'email',
+		'code' => array(
 			'notEmpty' => array(
 				'required' => false,
 				'allowEmpty' => false,
@@ -27,4 +33,5 @@ class MailgunCampaign extends MailgunAppModel {
 			)
 		),
 	);
+
 }

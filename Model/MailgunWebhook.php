@@ -1,23 +1,23 @@
 <?php
 App::uses('MailgunAppModel', 'Mailgun.Model');
 
-class MailgunCampaign extends MailgunAppModel {
+class MailgunWebhook extends MailgunAppModel {
 
 	protected $_schema = array(
-		'name' => array(
+		'id' => array(
 			'type' => 'string',
 			'null' => false,
 			'length' => 255,
 		),
-		'id' => array(
-			'type' => 'integer',
-			'null' => true,
-			'length' => 11,
+		'url' => array(
+			'type' => 'string',
+			'null' => false,
+			'length' => 255,
 		),
 	);
 
 	public $validate = array(
-		'name' => array(
+		'id' => array(
 			'notEmpty' => array(
 				'required' => false,
 				'allowEmpty' => false,
@@ -26,5 +26,8 @@ class MailgunCampaign extends MailgunAppModel {
 				)
 			)
 		),
+		'url' => array(
+			'rule' => array('url', true)
+		)
 	);
 }
