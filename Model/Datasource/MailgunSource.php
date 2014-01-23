@@ -1,4 +1,11 @@
 <?php
+/**
+ * @copyright 2014, Falk Romano
+ * @author Florian Krämer
+ * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
+ */
+App::uses('DataSource', 'Model/Datasource');
+
 class MailgunSource extends DataSource {
 
 /**
@@ -75,10 +82,15 @@ class MailgunSource extends DataSource {
 /**
  * create
  */
-	public function create(Model $model, $fields = null, $values = null) {
-		$data = array_combine($fields, $values);
+	public function create(Model $Model, $fields = null, $values = null) {
 		try {
-			$result = $this->Mailgun->post('domains', $data);
+			$data = array_combine($fields, $values);
+			if (isset($data['_endpoint'])) {
+				$endpointUrl = $data['_endpoint'];
+			} else {
+				$endpointUrl = $this->getEndpointFromModel($Model, 'create');
+			}
+			$result = $this->Mailgun->post($endpointUrl, $data);
 			if ($result->http_response_code === 200) {
 				return (array)$result->http_response_body;
 			}
@@ -87,6 +99,25 @@ class MailgunSource extends DataSource {
 			throw $e;
 		}
 		return false;
+	}
+
+/**
+ * getEndpointFromModel
+ *
+ * @throws RuntimeException
+ * @param Model $Model
+ * @param string $method API method name
+ * @return string
+ */
+	public function getEndpointFromModel(Model $Model, $method) {
+		$endpointUrl = false;
+		if (method_exists($Model, 'getMailgunEndpointUrl')) {
+			$endpointUrl = $Model->getMailgunEndpointUrl($method);
+		}
+		if ($endpointUrl === false) {
+			throw new RuntimeException(__d('mailgun', 'The model %s must implement a method getEndpointFromModel()!', $Model->name));
+		}
+		return $endpointUrl;
 	}
 
 }

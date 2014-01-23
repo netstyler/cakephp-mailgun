@@ -6,6 +6,6 @@
  */
 App::uses('MailgunAppModel', 'Mailgun.Model');
 
-class MailgunCampaignUnsubscribe extends MailgunAppModel {
+class MailgunMailingList extends MailgunAppModel {
 
 }

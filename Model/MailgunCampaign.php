@@ -3,6 +3,11 @@ App::uses('MailgunAppModel', 'Mailgun.Model');
 
 class MailgunCampaign extends MailgunAppModel {
 
+/**
+ * Schema
+ *
+ * @var array
+ */
 	protected $_schema = array(
 		'name' => array(
 			'type' => 'string',
@@ -16,6 +21,11 @@ class MailgunCampaign extends MailgunAppModel {
 		),
 	);
 
+/**
+ * Validation rules
+ *
+ * @var array
+ */
 	public $validate = array(
 		'name' => array(
 			'notEmpty' => array(
