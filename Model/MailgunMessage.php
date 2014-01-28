@@ -42,6 +42,29 @@ class MailgunMessage extends MailgunAppModel {
 			'null' => false,
 			'length' => 255,
 		),
+		'text' => array(
+			'type' => 'text',
+			'null' => true,
+		),
+		'html' => array(
+			'type' => 'text',
+			'null' => true,
+		),
+		'attachment' => array(
+			'type' => 'boolean',
+			'null' => true,
+			'default' => null
+		),
+		'o:tracking' => array(
+			'type' => 'boolean',
+			'null' => false,
+			'default' => 0,
+		),
+		'o:testmode' => array(
+			'type' => 'boolean',
+			'null' => false,
+			'default' => 0,
+		),
 	);
 
 /**
@@ -92,10 +115,9 @@ class MailgunMessage extends MailgunAppModel {
 		if (isset($this->data[$this->alias]['testmode'])) {
 			$this->data[$this->alias]['o:testmode'] = 'testmode';
 		}
-		if (isset($this->data[$this->alias]['domain'])) {
-			$this->data[$this->alias]['_endpoint'] = $this->data[$this->alias]['domain'];
-		}
-		debug($this->data);
+		//if (isset($this->data[$this->alias]['domain'])) {
+			//$this->data[$this->alias]['_endpoint'] = $this->data[$this->alias]['domain'];
+		//}
 		return true;
 	}
 

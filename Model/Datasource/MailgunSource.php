@@ -69,6 +69,7 @@ class MailgunSource extends DataSource {
 /**
  * getMailgunInstance
  *
+ * @throws RuntimeException
  * @param array $config
  * @return \Mailgun\Mailgun
  */
@@ -80,7 +81,14 @@ class MailgunSource extends DataSource {
 	}
 
 /**
- * create
+ * Create
+ *
+ * @param Model $Model
+ * @param array $fields
+ * @param array $values
+ * @throws Exception
+ * @throws Mailgun\Connection\Exceptions\MissingEndpoint
+ * @return mixed
  */
 	public function create(Model $Model, $fields = null, $values = null) {
 		try {
@@ -90,11 +98,19 @@ class MailgunSource extends DataSource {
 			} else {
 				$endpointUrl = $this->getEndpointFromModel($Model, 'create');
 			}
+			//debug($endpointUrl);
+			//debug($data);
+			//$result = $this->Mailgun->sendMessage($endpointUrl, $data);
 			$result = $this->Mailgun->post($endpointUrl, $data);
+			debug($result);
 			if ($result->http_response_code === 200) {
 				return (array)$result->http_response_body;
 			}
-		} catch (Exception $e) {
+			return false;
+		} catch (\Mailgun\Connection\Exceptions\MissingEndpoint $e) {
+			$this->log($e->getMessage(), 'mailgun');
+			throw $e;
+		} catch (\Exception $e) {
 			$this->log($e->getMessage(), 'mailgun');
 			throw $e;
 		}

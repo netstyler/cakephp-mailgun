@@ -38,6 +38,12 @@ class MailgunApiTransport extends AbstractTransport {
 		$this->_send();
 	}
 
+/**
+ * Formats the Email addresses
+ *
+ * @param string|array $address
+ * @return array
+ */
 	protected function _formatAddress($address) {
 		if (is_string($address)) {
 			return $address;
@@ -81,7 +87,7 @@ class MailgunApiTransport extends AbstractTransport {
 				'cc' => $this->_cakeEmail->cc(),
 				'bcc' => $this->_cakeEmail->bcc(),
 				'subject' => $this->_cakeEmail->subject(),
-				'o:testmode' => $this->_config['testmode']
+				//'o:testmode' => $this->_config['testmode']
 			)
 		);
 
@@ -98,15 +104,12 @@ class MailgunApiTransport extends AbstractTransport {
 		$attachments = $this->_cakeEmail->attachments();
 		if (!empty($attachments)) {
 			foreach ($attachments as $attachment) {
-				$message[$Model->alias]['attachments'][] = $attachment['file'];
+				$message[$Model->alias]['attachment'][] = '@' . $attachment['file'];
 			}
 		}
 
-		debug($message);
-		$result = $Model->save($message);
-		debug($Model->validationErrors);
-		die(debug($result));
-		return $result;
+		$message[$Model->alias]['_endpoint'] = $this->_cakeEmail->domain() . '/messages';
+		return $Model->save($message);
 	}
 
 }
