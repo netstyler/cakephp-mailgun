@@ -136,4 +136,11 @@ class MailgunSource extends DataSource {
 		return $endpointUrl;
 	}
 
+/**
+ *
+ */
+	public function responseToArray($response) {
+		return json_decode(json_encode($response), true);
+	}
+
 }

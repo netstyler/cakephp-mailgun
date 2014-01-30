@@ -111,13 +111,16 @@ class MailgunMessage extends MailgunAppModel {
 		),
 	);
 
+/**
+ * beforeSave callback
+ *
+ * @param array $options
+ * @return boolean
+ */
 	public function beforeSave($options = array()) {
 		if (isset($this->data[$this->alias]['testmode'])) {
 			$this->data[$this->alias]['o:testmode'] = 'testmode';
 		}
-		//if (isset($this->data[$this->alias]['domain'])) {
-			//$this->data[$this->alias]['_endpoint'] = $this->data[$this->alias]['domain'];
-		//}
 		return true;
 	}
 
