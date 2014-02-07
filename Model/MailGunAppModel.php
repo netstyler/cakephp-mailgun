@@ -55,4 +55,11 @@ class MailgunAppModel extends AppModel {
 		$this->_mailgunEndpointUrl = $url;
 	}
 
+/**
+ *
+ */
+	public function responseToArray($result) {
+		return json_decode(json_encode($result), true);
+	}
+
 }

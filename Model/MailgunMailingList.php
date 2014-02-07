@@ -65,6 +65,17 @@ class MailgunMailingList extends MailgunAppModel {
 	);
 
 /**
+ * getEndpointFromModel
+ *
+ * @return array
+ */
+	public function getMailgunEndpointUrl($method) {
+		if ($method === MailgunSource::READ) {
+			return 'lists';
+		}
+	}
+
+/**
  * Add
  *
  * @param string $address

@@ -9,6 +9,17 @@ App::uses('DataSource', 'Model/Datasource');
 class MailgunSource extends DataSource {
 
 /**
+ * Constants used to check what method is called so that the model can tell
+ * the data source the right endpoint
+ *
+ * @see MailgunSource::getEndpointFromModel()
+ */
+	const CREATE = 'create';
+	const READ = 'read';
+	const UPDATE = 'update';
+	const DELETE = 'delete';
+
+/**
  * Our default config options. These options will be customized in our
  * ``app/Config/database.php`` and will be merged in the ``__construct()``.
  */
@@ -102,7 +113,6 @@ class MailgunSource extends DataSource {
 			//debug($data);
 			//$result = $this->Mailgun->sendMessage($endpointUrl, $data);
 			$result = $this->Mailgun->post($endpointUrl, $data);
-			debug($result);
 			if ($result->http_response_code === 200) {
 				return (array)$result->http_response_body;
 			}
@@ -115,6 +125,50 @@ class MailgunSource extends DataSource {
 			throw $e;
 		}
 		return false;
+	}
+
+/**
+ * Read
+ *
+ * @param Model $model The model being read.
+ * @param array $queryData An array of query data used to find the data you want
+ * @param integer $recursive Number of levels of association
+ * @return mixed
+ */
+	public function read(Model $Model, $queryData = array(), $recursive = null) {
+		$endpointUrl = $this->getEndpointFromModel($Model, self::READ);
+		$result = $this->Mailgun->get($endpointUrl);
+		if ($result->http_response_code === 200) {
+			return $this->responseToArray($result->http_response_body);
+		}
+		return false;
+	}
+
+/**
+ * Issues a RESTful PUT to update a record
+ *
+ * @param Model $model
+ * @param array $fields
+ * @param array $values
+ * @param mixed $conditions
+ * @return array
+ */
+	public function update(Model $Model, $fields = array(), $values = null, $conditions = null) {
+		$data = array_combine($fields, $values);
+		$endpointUrl = $this->getEndpointFromModel($Model, 'create');
+		$result = $this->Mailgun->push($endpointUrl, $data);
+	}
+
+/**
+ * Generates and executes an SQL DELETE statement for given id/conditions on given model.
+ *
+ * @param Model $model
+ * @param mixed $conditions
+ * @return boolean Success
+ */
+	public function delete(Model $Model, $conditions = null) {
+		$this->getEndpointFromModel($Model, 'create');
+		$result = $this->Mailgun->delete($this->getEndpointFromModel($Model, null));
 	}
 
 /**
@@ -131,13 +185,16 @@ class MailgunSource extends DataSource {
 			$endpointUrl = $Model->getMailgunEndpointUrl($method);
 		}
 		if ($endpointUrl === false) {
-			throw new RuntimeException(__d('mailgun', 'The model %s must implement a method getEndpointFromModel()!', $Model->name));
+			throw new RuntimeException(__d('mailgun', 'The model %s must implement a method getMailgunEndpointUrl()!', $Model->name));
 		}
 		return $endpointUrl;
 	}
 
 /**
+ * Converts the json response with objects into an array
  *
+ * @param StdClass $response
+ * @return array
  */
 	public function responseToArray($response) {
 		return json_decode(json_encode($response), true);
