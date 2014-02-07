@@ -109,12 +109,9 @@ class MailgunSource extends DataSource {
 			} else {
 				$endpointUrl = $this->getEndpointFromModel($Model, 'create');
 			}
-			//debug($endpointUrl);
-			//debug($data);
-			//$result = $this->Mailgun->sendMessage($endpointUrl, $data);
 			$result = $this->Mailgun->post($endpointUrl, $data);
 			if ($result->http_response_code === 200) {
-				return (array)$result->http_response_body;
+				return $this->responseToArray($result->http_response_body);
 			}
 			return false;
 		} catch (\Mailgun\Connection\Exceptions\MissingEndpoint $e) {
@@ -136,10 +133,13 @@ class MailgunSource extends DataSource {
  * @return mixed
  */
 	public function read(Model $Model, $queryData = array(), $recursive = null) {
+		//debug($queryData);
 		$endpointUrl = $this->getEndpointFromModel($Model, self::READ);
 		$result = $this->Mailgun->get($endpointUrl);
 		if ($result->http_response_code === 200) {
-			return $this->responseToArray($result->http_response_body);
+			$result = $this->responseToArray($result->http_response_body);
+			debug($result['items']);
+			return array($Model->alias => $result['items']);
 		}
 		return false;
 	}
@@ -157,6 +157,10 @@ class MailgunSource extends DataSource {
 		$data = array_combine($fields, $values);
 		$endpointUrl = $this->getEndpointFromModel($Model, 'create');
 		$result = $this->Mailgun->push($endpointUrl, $data);
+		if ($result->http_response_code === 200) {
+			return $this->responseToArray($result->http_response_body);
+		}
+		return false;
 	}
 
 /**
@@ -169,6 +173,10 @@ class MailgunSource extends DataSource {
 	public function delete(Model $Model, $conditions = null) {
 		$this->getEndpointFromModel($Model, 'create');
 		$result = $this->Mailgun->delete($this->getEndpointFromModel($Model, null));
+		if ($result->http_response_code === 200) {
+			return $this->responseToArray($result->http_response_body);
+		}
+		return false;
 	}
 
 /**
