@@ -138,7 +138,7 @@ class MailgunSource extends DataSource {
 		$result = $this->Mailgun->get($endpointUrl);
 		if ($result->http_response_code === 200) {
 			$result = $this->responseToArray($result->http_response_body);
-			debug($result['items']);
+			//debug($result['items']);
 			return array($Model->alias => $result['items']);
 		}
 		return false;

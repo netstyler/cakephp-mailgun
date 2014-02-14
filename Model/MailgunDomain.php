@@ -8,6 +8,11 @@ App::uses('MailgunAppModel', 'Mailgun.Model');
 
 class MailgunDomain extends MailgunAppModel {
 
+/**
+ * Schema
+ *
+ * @var array
+ */
 	protected $_schema = array(
 		'name' => array(
 			'type' => 'string',
@@ -31,6 +36,11 @@ class MailgunDomain extends MailgunAppModel {
 		),
 	);
 
+/**
+ * Validation rules
+ *
+ * @var array
+ */
 	public $validate = array(
 		'name' => array(
 			'notEmpty' => array(
@@ -83,6 +93,8 @@ class MailgunDomain extends MailgunAppModel {
 	}
 
 /**
+ * getSpamActions
+ *
  * @link http://documentation.mailgun.com/user_manual.html#um-spam-filter
  */
 	public function getSpamActions() {
@@ -91,4 +103,17 @@ class MailgunDomain extends MailgunAppModel {
 			'tag' => __d('mailgun', 'Tag'),
 		);
 	}
+
+	public function getList() {
+		$result = $this->find('all');
+		$domains = Hash::extract($result, $this->alias . '.{n}.name');
+		return array_combine($domains, array_values($domains));
+	}
+
+	public function getMailgunEndpointUrl($method) {
+		if ($method === MailgunSource::READ) {
+			return 'domains';
+		}
+	}
+
 }
