@@ -67,29 +67,22 @@ class MailgunMailingList extends MailgunAppModel {
 /**
  * getEndpointFromModel
  *
- * @return array
+ * @param string $method
+ * @return string
  */
 	public function getMailgunEndpointUrl($method) {
+		if ($method === MailgunSource::CREATE) {
+			return 'lists';
+		}
 		if ($method === MailgunSource::READ) {
 			return 'lists';
 		}
-	}
-
-/**
- * Add
- *
- * @param string $address
- * @param string $description
- * @return boolean
- */
-	public function add($address, $description) {
-		$this->create();
-		return $this->save(array(
-			$this->alias => array(
-				'address' => $address,
-				'description' => $description
-			)
-		));
+		if ($method === MailgunSource::UPDATE) {
+			return false;
+		}
+		if ($method === MailgunSource::DELETE) {
+			return false;
+		}
 	}
 
 }

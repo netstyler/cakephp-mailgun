@@ -35,6 +35,13 @@ class MailgunSource extends DataSource {
 	protected $_schema = array();
 
 /**
+ * Response body
+ *
+ * @var array
+ */
+	protected $_responseBody = array();
+
+/**
  * listSources() is for caching. You'll likely want to implement caching in
  * your own way with a custom datasource. So just ``return null``.
  */
@@ -78,20 +85,6 @@ class MailgunSource extends DataSource {
 	}
 
 /**
- * getMailgunInstance
- *
- * @throws RuntimeException
- * @param array $config
- * @return \Mailgun\Mailgun
- */
-	public function getMailgunInstance($config = array()) {
-		if (empty($config['apiKey'])) {
-			throw new RuntimeException(__d('mailgun', 'You have to pass your API key in the password field of the datasource config!'));
-		}
-		return new \Mailgun\Mailgun($config['apiKey']);
-	}
-
-/**
  * Create
  *
  * @param Model $Model
@@ -109,10 +102,18 @@ class MailgunSource extends DataSource {
 			} else {
 				$endpointUrl = $this->getEndpointFromModel($Model, 'create');
 			}
-			$result = $this->Mailgun->post($endpointUrl, $data);
+
+			try {
+				$result = $this->Mailgun->post($endpointUrl, $data);
+			} catch (\Exception $e) {
+				$this->log($e->getMessage(), 'mailgun');
+				throw $e;
+			}
+
 			if ($result->http_response_code === 200) {
 				return $this->responseToArray($result->http_response_body);
 			}
+
 			return false;
 		} catch (\Mailgun\Connection\Exceptions\MissingEndpoint $e) {
 			$this->log($e->getMessage(), 'mailgun');
@@ -133,12 +134,17 @@ class MailgunSource extends DataSource {
  * @return mixed
  */
 	public function read(Model $Model, $queryData = array(), $recursive = null) {
-		//debug($queryData);
 		$endpointUrl = $this->getEndpointFromModel($Model, self::READ);
-		$result = $this->Mailgun->get($endpointUrl);
+
+		try {
+			$result = $this->Mailgun->get($endpointUrl);
+		} catch (\Exception $e) {
+			$this->log($e->getMessage(), 'mailgun');
+			throw $e;
+		}
+
 		if ($result->http_response_code === 200) {
 			$result = $this->responseToArray($result->http_response_body);
-			//debug($result['items']);
 			return array($Model->alias => $result['items']);
 		}
 		return false;
@@ -156,7 +162,14 @@ class MailgunSource extends DataSource {
 	public function update(Model $Model, $fields = array(), $values = null, $conditions = null) {
 		$data = array_combine($fields, $values);
 		$endpointUrl = $this->getEndpointFromModel($Model, 'create');
-		$result = $this->Mailgun->push($endpointUrl, $data);
+
+		try {
+			$result = $this->Mailgun->push($endpointUrl, $data);
+		} catch (\Exception $e) {
+			$this->log($e->getMessage(), 'mailgun');
+			throw $e;
+		}
+
 		if ($result->http_response_code === 200) {
 			return $this->responseToArray($result->http_response_body);
 		}
@@ -171,10 +184,22 @@ class MailgunSource extends DataSource {
  * @return boolean Success
  */
 	public function delete(Model $Model, $conditions = null) {
-		$this->getEndpointFromModel($Model, 'create');
-		$result = $this->Mailgun->delete($this->getEndpointFromModel($Model, null));
+		if (empty($Model->id)) {
+			$deleteUrl = $this->getEndpointFromModel($Model, 'create');
+		} else {
+			$deleteUrl = $Model->id;
+		}
+
+		try {
+			$result = $this->Mailgun->delete($deleteUrl);
+		} catch (\Exception $e) {
+			$this->log($e->getMessage(), 'mailgun');
+			throw $e;
+		}
+
 		if ($result->http_response_code === 200) {
-			return $this->responseToArray($result->http_response_body);
+			$this->_responseBody = $this->responseToArray($result->http_response_body);
+			return true;
 		}
 		return false;
 	}
@@ -199,6 +224,20 @@ class MailgunSource extends DataSource {
 	}
 
 /**
+ * getMailgunInstance
+ *
+ * @throws RuntimeException
+ * @param array $config
+ * @return \Mailgun\Mailgun
+ */
+	public function getMailgunInstance($config = array()) {
+		if (empty($config['apiKey'])) {
+			throw new RuntimeException(__d('mailgun', 'You have to pass your API key in the password field of the datasource config!'));
+		}
+		return new \Mailgun\Mailgun($config['apiKey']);
+	}
+
+/**
  * Converts the json response with objects into an array
  *
  * @param StdClass $response
@@ -206,6 +245,15 @@ class MailgunSource extends DataSource {
  */
 	public function responseToArray($response) {
 		return json_decode(json_encode($response), true);
+	}
+
+/**
+ * Returns the response body of the API call as array
+ *
+ * @return array
+ */
+	public function getResponse() {
+		return $this->_responseBody;
 	}
 
 }
