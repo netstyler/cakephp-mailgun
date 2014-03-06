@@ -100,13 +100,15 @@ class MailgunSource extends DataSource {
 			if (isset($data['_endpoint'])) {
 				$endpointUrl = $data['_endpoint'];
 			} else {
-				$endpointUrl = $this->getEndpointFromModel($Model, 'create');
+				$endpointUrl = $this->getEndpointFromModel($Model, 'create', $data);
 			}
 
 			try {
 				$result = $this->Mailgun->post($endpointUrl, $data);
 			} catch (\Exception $e) {
 				$this->log($e->getMessage(), 'mailgun');
+				$this->log($endpointUrl, 'mailgun');
+				$this->log($data, 'mailgun');
 				throw $e;
 			}
 
@@ -117,9 +119,11 @@ class MailgunSource extends DataSource {
 			return false;
 		} catch (\Mailgun\Connection\Exceptions\MissingEndpoint $e) {
 			$this->log($e->getMessage(), 'mailgun');
+			$this->log($endpointUrl, 'mailgun');
 			throw $e;
 		} catch (\Exception $e) {
 			$this->log($e->getMessage(), 'mailgun');
+			$this->log($endpointUrl, 'mailgun');
 			throw $e;
 		}
 		return false;
@@ -134,19 +138,38 @@ class MailgunSource extends DataSource {
  * @return mixed
  */
 	public function read(Model $Model, $queryData = array(), $recursive = null) {
-		$endpointUrl = $this->getEndpointFromModel($Model, self::READ);
-
+		$endpointUrl = $this->getEndpointFromModel($Model, self::READ, $queryData);
 		try {
 			$result = $this->Mailgun->get($endpointUrl);
 		} catch (\Exception $e) {
 			$this->log($e->getMessage(), 'mailgun');
+			$this->log($endpointUrl, 'mailgun');
 			throw $e;
 		}
 
 		if ($result->http_response_code === 200) {
 			$result = $this->responseToArray($result->http_response_body);
-			return array($Model->alias => $result['items']);
+			if (isset($result['items'])) {
+				$data = array($Model->alias => $result['items']);
+				if ($queryData['fields'] === 'COUNT') {
+					return $result[0][0]['count'] = $result['total_count'];
+				}
+				return $data;
+			}
+			if (isset($result['domain'])) {
+				if ($queryData['fields'] === 'COUNT') {
+					return array(
+						0 => array(
+							0 => array(
+								'count' => 1
+							)
+						)
+					);
+				}
+				return array($Model->alias => $result['domain']);
+			}
 		}
+
 		return false;
 	}
 
@@ -167,6 +190,7 @@ class MailgunSource extends DataSource {
 			$result = $this->Mailgun->push($endpointUrl, $data);
 		} catch (\Exception $e) {
 			$this->log($e->getMessage(), 'mailgun');
+			$this->log($endpointUrl, 'mailgun');
 			throw $e;
 		}
 
@@ -210,12 +234,13 @@ class MailgunSource extends DataSource {
  * @throws RuntimeException
  * @param Model $Model
  * @param string $method API method name
+ * @param array $data
  * @return string
  */
-	public function getEndpointFromModel(Model $Model, $method) {
+	public function getEndpointFromModel(Model $Model, $method, $data = array()) {
 		$endpointUrl = false;
 		if (method_exists($Model, 'getMailgunEndpointUrl')) {
-			$endpointUrl = $Model->getMailgunEndpointUrl($method);
+			$endpointUrl = $Model->getMailgunEndpointUrl($method, $data);
 		}
 		if ($endpointUrl === false) {
 			throw new RuntimeException(__d('mailgun', 'The model %s must implement a method getMailgunEndpointUrl()!', $Model->name));

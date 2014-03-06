@@ -9,6 +9,13 @@ App::uses('MailgunAppModel', 'Mailgun.Model');
 class MailgunDomain extends MailgunAppModel {
 
 /**
+ * Primary Key
+ *
+ * @param string
+ */
+	public $primarKey = 'name';
+
+/**
  * Schema
  *
  * @var array
@@ -88,7 +95,14 @@ class MailgunDomain extends MailgunAppModel {
 		),
 	);
 
-	public function delete($id = NULL, $cascade = true) {
+/**
+ * Delete
+ *
+ * @param string $id
+ * @param boolean $cascade
+ * @return boolean
+ */
+	public function delete($id = null, $cascade = true) {
 		return parent::delete('/domains/' . $id);
 	}
 
@@ -96,6 +110,7 @@ class MailgunDomain extends MailgunAppModel {
  * getSpamActions
  *
  * @link http://documentation.mailgun.com/user_manual.html#um-spam-filter
+ * @return array
  */
 	public function getSpamActions() {
 		return array(
@@ -104,15 +119,39 @@ class MailgunDomain extends MailgunAppModel {
 		);
 	}
 
+/**
+ * getList
+ *
+ * @return array
+ */
 	public function getList() {
 		$result = $this->find('all');
 		$domains = Hash::extract($result, $this->alias . '.{n}.name');
 		return array_combine($domains, array_values($domains));
 	}
 
-	public function getMailgunEndpointUrl($method) {
-		if ($method === MailgunSource::READ) {
+/**
+ * getMailgunEndpointUrl
+ *
+ * @param string CRUD method name
+ * @param array $data
+ * @return string
+ */
+	public function getMailgunEndpointUrl($method, $data = array()) {
+		if ($method === MailgunSource::CREATE) {
 			return 'domains';
+		}
+		if ($method === MailgunSource::READ) {
+			if (isset($data['conditions'][$this->alias . '.' . $this->primaryKey])) {
+				return 'domains/' . $data['conditions'][$this->alias . '.' . $this->primaryKey];
+			}
+			return 'domains';
+		}
+		if ($method === MailgunSource::UPDATE) {
+			return 'domains';
+		}
+		if ($method === MailgunSource::DELETE) {
+			//return 'domains';
 		}
 	}
 

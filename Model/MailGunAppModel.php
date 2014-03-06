@@ -38,50 +38,19 @@ class MailgunAppModel extends AppModel {
  * @link http://book.cakephp.org/2.0/en/models/deleting-data.html
  */
 	public function delete($id = null, $cascade = true) {
-		if (!empty($id)) {
-			$this->id = $id;
-		}
+		return parent::delete($id, $cascade = false);
+	}
 
-		$id = $this->id;
-
-		$event = new CakeEvent('Model.beforeDelete', $this, array($cascade));
-		list($event->break, $event->breakOn) = array(true, array(false, null));
-		$this->getEventManager()->dispatch($event);
-		if ($event->isStopped()) {
-			return false;
-		}
-
-		$this->id = $id;
-
-		if (!empty($this->belongsTo)) {
-			foreach ($this->belongsTo as $assoc) {
-				if (empty($assoc['counterCache'])) {
-					continue;
-				}
-
-				$keys = $this->find('first', array(
-					'fields' => $this->_collectForeignKeys(),
-					'conditions' => array($this->alias . '.' . $this->primaryKey => $id),
-					'recursive' => -1,
-					'callbacks' => false
-				));
-				break;
-			}
-		}
-
-		if (!$this->getDataSource()->delete($this, array($this->alias . '.' . $this->primaryKey => $id))) {
-			return false;
-		}
-
-		if (!empty($keys[$this->alias])) {
-			$this->updateCounterCache($keys[$this->alias]);
-		}
-
-		$this->getEventManager()->dispatch(new CakeEvent('Model.afterDelete', $this));
-		$this->_clearCache();
-		$this->id = false;
-
-		return true;
+/**
+ * Cascades model deletes through HABTM join keys.
+ *
+ * Overriden because these API models can't work with HABTM
+ *
+ * @param string $id ID of record that was deleted
+ * @return void
+ */
+	protected function _deleteLinks($id) {
+		return;
 	}
 
 /**

@@ -13,8 +13,6 @@ echo $this->Form->input('spam_action', array(
 ));
 echo '<p>' . __d('mailgun', 'Disabled or tag Disable, no spam filtering will occur for inbound messages. Tag, messages will be tagged wtih a spam header.') . '</p>';
 
-
-
 echo $this->Form->input('wildcard', array(
 	'type' => 'radio',
 	'options' => array(
