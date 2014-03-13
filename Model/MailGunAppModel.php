@@ -11,18 +11,6 @@ class MailgunAppModel extends AppModel {
 	public $useDbConfig = 'mailgun';
 
 /**
- * Endpoint URLs for different API methods the model can call
- *
- * @var array
- */
-	public $mailgunEndpointUrls = array();
-
-/**
- *
- */
-	protected $_mailgunEndpointUrl = null;
-
-/**
  * Table
  *
  * @var boolean|string
@@ -93,7 +81,7 @@ class MailgunAppModel extends AppModel {
  * @param array $ccheck
  * @return boolean
  */
-	public function validDomainName($check) {
+	public function validateDomainName($check) {
 		$value = array_values($check);
 		$value = $value[0];
 

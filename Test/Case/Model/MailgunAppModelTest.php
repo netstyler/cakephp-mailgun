@@ -30,29 +30,31 @@ class MailgunAppModelTest extends CakeTestCase {
 	}
 
 /**
+ * testValidateDomainName
  *
+ * @return void
  */
-	public function testValidDomainName() {
+	public function testValidateDomainName() {
 		$data = array('name' => 'foobar');
-		$result = $this->Model->validDomainName($data);
+		$result = $this->Model->validateDomainName($data);
 		$this->assertFalse($result);
 
 		$data = array('name' => 'foobar.de-');
-		$result = $this->Model->validDomainName($data);
+		$result = $this->Model->validateDomainName($data);
 		$this->assertFalse($result);
 
 		$data = array('name' => '-foobar.de');
-		$result = $this->Model->validDomainName($data);
+		$result = $this->Model->validateDomainName($data);
 		$this->assertFalse($result);
 
 		// Domains that must work:
 
 		$data = array('name' => 'foo-bar.de');
-		$result = $this->Model->validDomainName($data);
+		$result = $this->Model->validateDomainName($data);
 		$this->assertTrue($result);
 
 		$data = array('name' => 'foo-bar.museum');
-		$result = $this->Model->validDomainName($data);
+		$result = $this->Model->validateDomainName($data);
 		$this->assertTrue($result);
 	}
 }

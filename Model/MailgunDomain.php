@@ -13,7 +13,7 @@ class MailgunDomain extends MailgunAppModel {
  *
  * @param string
  */
-	public $primarKey = 'name';
+	public $primaryKey = 'name';
 
 /**
  * Schema
@@ -61,7 +61,7 @@ class MailgunDomain extends MailgunAppModel {
 				'required' => false,
 				'allowEmpty' => false,
 				'rule' => array(
-					'validDomainName'
+					'validateDomainName'
 				),
 				'message' => 'Invalid domain name'
 			),

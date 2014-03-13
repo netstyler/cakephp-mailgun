@@ -14,11 +14,6 @@ class MailgunMailingList extends MailgunAppModel {
  * @var array
  */
 	protected $_schema = array(
-		'_endpoint' => array(
-			'type' => 'string',
-			'length' => 255,
-			'null' => true
-		),
 		'address' => array(
 			'type' => 'string',
 			'null' => false,
@@ -61,6 +56,19 @@ class MailgunMailingList extends MailgunAppModel {
 					'notEmpty'
 				)
 			)
+		),
+		'access_level' => array(
+			'inList' => array(
+				'required' => true,
+				'allowEmpty' => false,
+				'rule' => array(
+					'inList' => array(
+						'readonly',
+						'members',
+						'everyone'
+					)
+				)
+			)
 		)
 	);
 
@@ -68,9 +76,10 @@ class MailgunMailingList extends MailgunAppModel {
  * getEndpointFromModel
  *
  * @param string $method
+ * @param array $data
  * @return string
  */
-	public function getMailgunEndpointUrl($method) {
+	public function getMailgunEndpointUrl($method, $data = array()) {
 		if ($method === MailgunSource::CREATE) {
 			return 'lists';
 		}

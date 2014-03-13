@@ -183,7 +183,12 @@ class MailgunSource extends DataSource {
  */
 	public function update(Model $Model, $fields = array(), $values = null, $conditions = null) {
 		$data = array_combine($fields, $values);
-		$endpointUrl = $this->getEndpointFromModel($Model, 'create');
+		$endpointUrl = $this->getEndpointFromModel($Model, 'create', array(
+			'data' => $data,
+			'fields' => $fields,
+			'values' => $values,
+			'conditions' => $conditions
+		));
 
 		try {
 			$result = $this->Mailgun->push($endpointUrl, $data);
