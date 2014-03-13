@@ -108,7 +108,6 @@ class MailgunSource extends DataSource {
 			} catch (\Exception $e) {
 				$this->log($e->getMessage(), 'mailgun');
 				$this->log($endpointUrl, 'mailgun');
-				$this->log($data, 'mailgun');
 				throw $e;
 			}
 
@@ -208,16 +207,16 @@ class MailgunSource extends DataSource {
  * @return boolean Success
  */
 	public function delete(Model $Model, $conditions = null) {
-		if (empty($Model->id)) {
-			$deleteUrl = $this->getEndpointFromModel($Model, 'create');
-		} else {
-			$deleteUrl = $Model->id;
-		}
+		$deleteUrl = $this->getEndpointFromModel($Model, self::DELETE, array(
+			'conditions' => $conditions,
+			'id' => $Model->id
+		));
 
 		try {
 			$result = $this->Mailgun->delete($deleteUrl);
 		} catch (\Exception $e) {
 			$this->log($e->getMessage(), 'mailgun');
+			$this->log($deleteUrl, 'mailgun');
 			throw $e;
 		}
 

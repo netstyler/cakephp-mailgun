@@ -86,4 +86,22 @@ class MailgunAppModel extends AppModel {
 		return json_decode(json_encode($result), true);
 	}
 
+/**
+ * Validates a domain name
+ *
+ * @link http://www.php.net/preg_match
+ * @param array $ccheck
+ * @return boolean
+ */
+	public function validDomainName($check) {
+		$value = array_values($check);
+		$value = $value[0];
+
+		$result = preg_match('/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/', $value);
+		if (is_int($result)) {
+			return (bool)$result;
+		}
+		return false;
+	}
+
 }

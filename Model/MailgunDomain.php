@@ -56,8 +56,17 @@ class MailgunDomain extends MailgunAppModel {
 				'rule' => array(
 					'notEmpty'
 				)
-			)
+			),
+			'validDomain' => array(
+				'required' => false,
+				'allowEmpty' => false,
+				'rule' => array(
+					'validDomainName'
+				),
+				'message' => 'Invalid domain name'
+			),
 		),
+		/*
 		'smtp_password' => array(
 			'notEmpty' => array(
 				'required' => false,
@@ -67,6 +76,7 @@ class MailgunDomain extends MailgunAppModel {
 				)
 			)
 		),
+		*/
 		'spam_action' => array(
 			'validAction' => array(
 				'required' => false,
@@ -92,19 +102,8 @@ class MailgunDomain extends MailgunAppModel {
 					)
 				)
 			)
-		),
+		)
 	);
-
-/**
- * Delete
- *
- * @param string $id
- * @param boolean $cascade
- * @return boolean
- */
-	public function delete($id = null, $cascade = true) {
-		return parent::delete('/domains/' . $id);
-	}
 
 /**
  * getSpamActions
@@ -148,10 +147,10 @@ class MailgunDomain extends MailgunAppModel {
 			return 'domains';
 		}
 		if ($method === MailgunSource::UPDATE) {
-			return 'domains';
+			return 'domains/' . $this->id;
 		}
 		if ($method === MailgunSource::DELETE) {
-			//return 'domains';
+			return 'domains/' . $this->id;
 		}
 	}
 
